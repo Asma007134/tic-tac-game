@@ -1,16 +1,15 @@
- import streamlit as st
-import time
+import streamlit as st
 import random
 
 st.set_page_config(layout="wide", page_title="🐍 Snake Game")
 
 # ---------- Initialize ----------
 if "snake" not in st.session_state:
-    st.session_state.snake = [(5,5)]
+    st.session_state.snake = [(5, 5)]
 if "direction" not in st.session_state:
     st.session_state.direction = "RIGHT"
 if "food" not in st.session_state:
-    st.session_state.food = (random.randint(0,9), random.randint(0,9))
+    st.session_state.food = (random.randint(0, 9), random.randint(0, 9))
 if "score" not in st.session_state:
     st.session_state.score = 0
 if "game_over" not in st.session_state:
@@ -29,26 +28,26 @@ def move_snake():
         head_x += 1
 
     new_head = (head_x, head_y)
-    
+
     # Check collisions
-    if (head_x < 0 or head_x > 9 or head_y < 0 or head_y > 9 or new_head in st.session_state.snake):
+    if head_x < 0 or head_x > 9 or head_y < 0 or head_y > 9 or new_head in st.session_state.snake:
         st.session_state.game_over = True
         return
-    
+
     st.session_state.snake.append(new_head)
-    
+
     # Check food
     if new_head == st.session_state.food:
         st.session_state.score += 1
-        st.session_state.food = (random.randint(0,9), random.randint(0,9))
+        st.session_state.food = (random.randint(0, 9), random.randint(0, 9))
     else:
         st.session_state.snake.pop(0)
 
 # ---------- Reset Game ----------
 def reset_game():
-    st.session_state.snake = [(5,5)]
+    st.session_state.snake = [(5, 5)]
     st.session_state.direction = "RIGHT"
-    st.session_state.food = (random.randint(0,9), random.randint(0,9))
+    st.session_state.food = (random.randint(0, 9), random.randint(0, 9))
     st.session_state.score = 0
     st.session_state.game_over = False
 
@@ -85,10 +84,10 @@ for x, y in st.session_state.snake:
 fx, fy = st.session_state.food
 board[fy][fx] = "🍎"
 
-# Show board
 for row in board:
     st.write("".join(row))
 
-# Show score
+# ---------- Score ----------
 st.info(f"Score: {st.session_state.score}")
+
 
