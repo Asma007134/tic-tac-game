@@ -1,59 +1,94 @@
-import streamlit as st
+ import streamlit as st
+import time
+import random
 
-# Initialize
-if "board" not in st.session_state:
-    st.session_state.board = [""] * 9
-if "turn" not in st.session_state:
-    st.session_state.turn = "X"
-if "winner" not in st.session_state:
-    st.session_state.winner = None
+st.set_page_config(layout="wide", page_title="🐍 Snake Game")
 
-# Check winner
-def check_winner(board):
-    wins = [
-        [0,1,2],[3,4,5],[6,7,8],
-        [0,3,6],[1,4,7],[2,5,8],
-        [0,4,8],[2,4,6]
-    ]
-    for line in wins:
-        if board[line[0]] == board[line[1]] == board[line[2]] != "":
-            return board[line[0]]
-    if "" not in board:
-        return "Draw"
-    return None
+# ---------- Initialize ----------
+if "snake" not in st.session_state:
+    st.session_state.snake = [(5,5)]
+if "direction" not in st.session_state:
+    st.session_state.direction = "RIGHT"
+if "food" not in st.session_state:
+    st.session_state.food = (random.randint(0,9), random.randint(0,9))
+if "score" not in st.session_state:
+    st.session_state.score = 0
+if "game_over" not in st.session_state:
+    st.session_state.game_over = False
 
-# Make move
-def make_move(idx):
-    if st.session_state.board[idx] == "" and st.session_state.winner is None:
-        st.session_state.board[idx] = st.session_state.turn
-        st.session_state.winner = check_winner(st.session_state.board)
-        if st.session_state.winner is None:
-            st.session_state.turn = "O" if st.session_state.turn == "X" else "X"
+# ---------- Move Snake ----------
+def move_snake():
+    head_x, head_y = st.session_state.snake[-1]
+    if st.session_state.direction == "UP":
+        head_y -= 1
+    elif st.session_state.direction == "DOWN":
+        head_y += 1
+    elif st.session_state.direction == "LEFT":
+        head_x -= 1
+    elif st.session_state.direction == "RIGHT":
+        head_x += 1
 
-# Reset game
-def reset_game():
-    st.session_state.board = [""] * 9
-    st.session_state.turn = "X"
-    st.session_state.winner = None
-
-# Title
-st.title("🎮 Tic Tac Toe Pro")
-
-# Winner
-if st.session_state.winner:
-    if st.session_state.winner == "Draw":
-        st.success("✨ It's a Draw! ✨")
+    new_head = (head_x, head_y)
+    
+    # Check collisions
+    if (head_x < 0 or head_x > 9 or head_y < 0 or head_y > 9 or new_head in st.session_state.snake):
+        st.session_state.game_over = True
+        return
+    
+    st.session_state.snake.append(new_head)
+    
+    # Check food
+    if new_head == st.session_state.food:
+        st.session_state.score += 1
+        st.session_state.food = (random.randint(0,9), random.randint(0,9))
     else:
-        st.success(f"🏆 Player {st.session_state.winner} Wins!")
+        st.session_state.snake.pop(0)
 
-# Board using columns
-for row in range(3):
-    cols = st.columns(3)
-    for col in range(3):
-        idx = row * 3 + col
-        label = st.session_state.board[idx]
-        if cols[col].button(label):
-            make_move(idx)
+# ---------- Reset Game ----------
+def reset_game():
+    st.session_state.snake = [(5,5)]
+    st.session_state.direction = "RIGHT"
+    st.session_state.food = (random.randint(0,9), random.randint(0,9))
+    st.session_state.score = 0
+    st.session_state.game_over = False
 
-# Reset button
-st.button("🔄 Reset Game", on_click=reset_game)
+# ---------- Controls ----------
+cols = st.columns(3)
+with cols[0]:
+    if st.button("⬅️ Left"):
+        if st.session_state.direction != "RIGHT":
+            st.session_state.direction = "LEFT"
+with cols[1]:
+    if st.button("⬆️ Up"):
+        if st.session_state.direction != "DOWN":
+            st.session_state.direction = "UP"
+    if st.button("🔄 Reset"):
+        reset_game()
+with cols[2]:
+    if st.button("➡️ Right"):
+        if st.session_state.direction != "LEFT":
+            st.session_state.direction = "RIGHT"
+    if st.button("⬇️ Down"):
+        if st.session_state.direction != "UP":
+            st.session_state.direction = "DOWN"
+
+# ---------- Game Tick ----------
+if not st.session_state.game_over:
+    move_snake()
+else:
+    st.warning("💀 Game Over! Press Reset.")
+
+# ---------- Display Board ----------
+board = [["⬜" for _ in range(10)] for _ in range(10)]
+for x, y in st.session_state.snake:
+    board[y][x] = "🟩"
+fx, fy = st.session_state.food
+board[fy][fx] = "🍎"
+
+# Show board
+for row in board:
+    st.write("".join(row))
+
+# Show score
+st.info(f"Score: {st.session_state.score}")
+
