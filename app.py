@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import time
 
 st.set_page_config(layout="wide", page_title="🐍 Snake Game")
 
@@ -14,66 +15,80 @@ if "score" not in st.session_state:
     st.session_state.score = 0
 if "game_over" not in st.session_state:
     st.session_state.game_over = False
+if "tick" not in st.session_state:
+    st.session_state.tick = 0
 
 # ---------- Move Snake ----------
 def move_snake():
     head_x, head_y = st.session_state.snake[-1]
-    if st.session_state.direction == "UP":
+    dir = st.session_state.direction
+    if dir == "UP":
         head_y -= 1
-    elif st.session_state.direction == "DOWN":
+    elif dir == "DOWN":
         head_y += 1
-    elif st.session_state.direction == "LEFT":
+    elif dir == "LEFT":
         head_x -= 1
-    elif st.session_state.direction == "RIGHT":
+    elif dir == "RIGHT":
         head_x += 1
 
     new_head = (head_x, head_y)
-
-    # Check collisions
+    
+    # Collision
     if head_x < 0 or head_x > 9 or head_y < 0 or head_y > 9 or new_head in st.session_state.snake:
         st.session_state.game_over = True
         return
-
+    
     st.session_state.snake.append(new_head)
-
-    # Check food
+    
+    # Food
     if new_head == st.session_state.food:
         st.session_state.score += 1
         st.session_state.food = (random.randint(0, 9), random.randint(0, 9))
     else:
         st.session_state.snake.pop(0)
 
-# ---------- Reset Game ----------
+# ---------- Reset ----------
 def reset_game():
-    st.session_state.snake = [(5, 5)]
+    st.session_state.snake = [(5,5)]
     st.session_state.direction = "RIGHT"
-    st.session_state.food = (random.randint(0, 9), random.randint(0, 9))
+    st.session_state.food = (random.randint(0,9), random.randint(0,9))
     st.session_state.score = 0
     st.session_state.game_over = False
+    st.session_state.tick = 0
 
-# ---------- Controls ----------
-cols = st.columns(3)
-with cols[0]:
-    if st.button("⬅️ Left"):
-        if st.session_state.direction != "RIGHT":
-            st.session_state.direction = "LEFT"
-with cols[1]:
-    if st.button("⬆️ Up"):
-        if st.session_state.direction != "DOWN":
-            st.session_state.direction = "UP"
-    if st.button("🔄 Reset"):
-        reset_game()
-with cols[2]:
-    if st.button("➡️ Right"):
-        if st.session_state.direction != "LEFT":
-            st.session_state.direction = "RIGHT"
-    if st.button("⬇️ Down"):
-        if st.session_state.direction != "UP":
-            st.session_state.direction = "DOWN"
+# ---------- Keyboard Input ----------
+st.markdown("""
+<script>
+document.addEventListener('keydown', function(e) {
+    if(e.key == 'ArrowUp'){window.parent.postMessage({func:'up'}, '*')}
+    if(e.key == 'ArrowDown'){window.parent.postMessage({func:'down'}, '*')}
+    if(e.key == 'ArrowLeft'){window.parent.postMessage({func:'left'}, '*')}
+    if(e.key == 'ArrowRight'){window.parent.postMessage({func:'right'}, '*')}
+});
+</script>
+""", unsafe_allow_html=True)
 
-# ---------- Game Tick ----------
+def key_input():
+    from streamlit.components.v1 import html
+    html("""
+    <script>
+    const send = (dir) => { window.parent.postMessage({func: dir}, '*') }
+    window.addEventListener('message', event => {
+        if(event.data.func === 'up'){window.parent.stSetValue('direction','UP')}
+        if(event.data.func === 'down'){window.parent.stSetValue('direction','DOWN')}
+        if(event.data.func === 'left'){window.parent.stSetValue('direction','LEFT')}
+        if(event.data.func === 'right'){window.parent.stSetValue('direction','RIGHT')}
+    });
+    </script>
+    """, height=0)
+
+key_input()
+
+# ---------- Auto-move using st_autorefresh ----------
 if not st.session_state.game_over:
-    move_snake()
+    st.session_state.tick += 1
+    if st.session_state.tick % 1 == 0:  # Adjust speed
+        move_snake()
 else:
     st.warning("💀 Game Over! Press Reset.")
 
@@ -89,5 +104,13 @@ for row in board:
 
 # ---------- Score ----------
 st.info(f"Score: {st.session_state.score}")
+
+# ---------- Reset Button ----------
+st.button("🔄 Reset Game", on_click=reset_game)
+
+# ---------- Auto-refresh every 0.5s ----------
+st_autorefresh = st.experimental_rerun  # simple trick
+st.experimental_rerun()
+
 
 
