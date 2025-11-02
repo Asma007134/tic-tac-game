@@ -1,62 +1,62 @@
-  import streamlit as st
+import streamlit as st
 
 # ---------- CSS Styling ----------
 st.markdown(
-    """
-    <style>
-    body {
-        background: linear-gradient(to right, #6a11cb, #2575fc);
-        color: white;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    .board {
-        display: grid;
-        grid-template-columns: repeat(3, 110px);
-        grid-gap: 10px;
-        justify-content: center;
-        margin-top: 20px;
-    }
-    .game-button button {
-        font-size: 50px;
-        height: 110px;
-        width: 110px;
-        border-radius: 15px;
-        border: 2px solid #fff;
-        background-color: rgba(255, 255, 255, 0.15);
-        color: #fff;
-        transition: 0.3s;
-    }
-    .game-button button:hover {
-        background-color: rgba(255, 255, 255, 0.35);
-        transform: scale(1.15);
-        cursor: pointer;
-    }
-    .winner {
-        font-size: 32px;
-        margin: 20px 0;
-        text-align: center;
-        animation: fadeIn 1s ease-in-out;
-    }
-    @keyframes fadeIn {
-        from {opacity:0;}
-        to {opacity:1;}
-    }
-    .reset-btn button {
-        margin-top: 20px;
-        font-size: 22px;
-        padding: 10px 30px;
-        border-radius: 12px;
-        background-color: rgba(255,255,255,0.3);
-        color: white;
-        transition: 0.3s;
-    }
-    .reset-btn button:hover {
-        background-color: rgba(255,255,255,0.6);
-        cursor: pointer;
-        transform: scale(1.05);
-    }
-    </style>
-    """, unsafe_allow_html=True
+"""
+<style>
+body {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 110px);
+    grid-gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+.game-button button {
+    font-size: 50px;
+    height: 110px;
+    width: 110px;
+    border-radius: 15px;
+    border: 2px solid #fff;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transition: 0.3s;
+}
+.game-button button:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    transform: scale(1.15);
+    cursor: pointer;
+}
+.winner {
+    font-size: 32px;
+    margin: 20px 0;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+}
+@keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+}
+.reset-btn button {
+    margin-top: 20px;
+    font-size: 22px;
+    padding: 10px 30px;
+    border-radius: 12px;
+    background-color: rgba(255,255,255,0.3);
+    color: white;
+    transition: 0.3s;
+}
+.reset-btn button:hover {
+    background-color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transform: scale(1.05);
+}
+</style>
+""", unsafe_allow_html=True
 )
 
 # ---------- Initialize game ----------
@@ -124,4 +124,3 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
 st.button("🔄 Reset Game", on_click=reset_game)
 st.markdown('</div>', unsafe_allow_html=True)
-
